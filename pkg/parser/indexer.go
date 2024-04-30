@@ -40,18 +40,19 @@ func (p *Parser) index(ctx context.Context) {
 		return
 	}
 
-	for i := storageLastBlock; i.Cmp(networkLastBlock) < 0; i.Add(i, big.NewInt(1)) {
+	startBlock := new(big.Int).Add(storageLastBlock, big.NewInt(1))
+
+	for i := startBlock; i.Cmp(networkLastBlock) <= 0; i.Add(i, big.NewInt(1)) {
 		err = p.indexBlocks(ctx, i)
 		if err != nil {
 			p.log.Println("Error indexing block:", err)
-			continue
+			return
 		}
-		err = p.s.SetLastBlock(i)
-		if err != nil {
-			p.log.Println("Error setting last block:", err)
-			continue
-		}
+	}
 
+	err = p.s.SetLastBlock(networkLastBlock)
+	if err != nil {
+		p.log.Println("Error setting last block:", err)
 	}
 
 }
