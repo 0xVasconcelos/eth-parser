@@ -3,8 +3,6 @@ package parser
 import (
 	"math/big"
 	"sync"
-
-	"github.com/0xVasconcelos/ethparser/pkg/ethereum"
 )
 
 type Storage interface {
@@ -14,8 +12,8 @@ type Storage interface {
 	IsSubscribed(address string) (bool, error)
 
 	// Handle transactions
-	AddTransaction(address string, tx ethereum.Transaction) error
-	GetTransactions(address string) ([]ethereum.Transaction, error)
+	AddTransaction(address string, tx Transaction) error
+	GetTransactions(address string) ([]Transaction, error)
 
 	// Handle indexing state
 	GetLastBlock() (*big.Int, error)
@@ -24,7 +22,7 @@ type Storage interface {
 
 type MemoryStorage struct {
 	subscriptions map[string]bool
-	transactions  map[string][]ethereum.Transaction
+	transactions  map[string][]Transaction
 	lastBlock     *big.Int
 
 	mu sync.Mutex
@@ -33,7 +31,7 @@ type MemoryStorage struct {
 func NewMemoryStorage() *MemoryStorage {
 	return &MemoryStorage{
 		subscriptions: make(map[string]bool),
-		transactions:  make(map[string][]ethereum.Transaction),
+		transactions:  make(map[string][]Transaction),
 		lastBlock:     big.NewInt(0),
 	}
 }
@@ -59,14 +57,14 @@ func (s *MemoryStorage) IsSubscribed(address string) (bool, error) {
 	return ok, nil
 }
 
-func (s *MemoryStorage) AddTransaction(addr string, tx ethereum.Transaction) error {
+func (s *MemoryStorage) AddTransaction(addr string, tx Transaction) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.transactions[addr] = append(s.transactions[addr], tx)
 	return nil
 }
 
-func (s *MemoryStorage) GetTransactions(addr string) ([]ethereum.Transaction, error) {
+func (s *MemoryStorage) GetTransactions(addr string) ([]Transaction, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	return s.transactions[addr], nil

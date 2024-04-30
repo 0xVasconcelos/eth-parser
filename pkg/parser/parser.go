@@ -3,22 +3,12 @@ package parser
 import (
 	"context"
 	"log"
-	"math/big"
 	"time"
 
 	"github.com/0xVasconcelos/ethparser/pkg/ethereum"
 )
 
-type Transaction struct {
-	Hash     string
-	From     string
-	To       string
-	Value    string
-	Gas      string
-	GasPrice string
-}
-
-type Notifier struct {
+type Parser struct {
 	e   *ethereum.Client
 	s   Storage
 	log *log.Logger
@@ -26,8 +16,8 @@ type Notifier struct {
 	sem chan struct{}
 }
 
-func NewNotifier(e *ethereum.Client, s Storage, log *log.Logger) *Notifier {
-	return &Notifier{
+func NewParser(e *ethereum.Client, s Storage, log *log.Logger) *Parser {
+	return &Parser{
 		e:   e,
 		s:   s,
 		log: log,
@@ -35,27 +25,31 @@ func NewNotifier(e *ethereum.Client, s Storage, log *log.Logger) *Notifier {
 	}
 }
 
-func (n *Notifier) GetCurrentBlock(ctx context.Context) (*big.Int, error) {
-	return n.s.GetLastBlock()
+func (p *Parser) GetCurrentBlock(ctx context.Context) (uint64, error) {
+	latestBlock, err := p.e.GetCurrentBlock(ctx)
+	if err != nil {
+		return 0, err
+	}
+	return latestBlock.Uint64(), nil
 }
 
-func (n *Notifier) Subscribe(ctx context.Context, address string) bool {
-	err := n.s.AddSubscription(address)
+func (p *Parser) Subscribe(ctx context.Context, address string) bool {
+	err := p.s.AddSubscription(address)
 	return err == nil
 }
 
-func (n *Notifier) GetTransactions(ctx context.Context, address string) ([]ethereum.Transaction, error) {
-	return n.s.GetTransactions(address)
+func (p *Parser) GetTransactions(ctx context.Context, address string) ([]Transaction, error) {
+	return p.s.GetTransactions(address)
 }
 
-func (n *Notifier) Start(ctx context.Context, ticker *time.Ticker) {
+func (p *Parser) Start(ctx context.Context, ticker *time.Ticker) {
 
 	for {
 		select {
 		case <-ticker.C:
 			select {
-			case n.sem <- struct{}{}:
-				go n.index(ctx)
+			case p.sem <- struct{}{}:
+				go p.index(ctx)
 			default:
 				// sem is full, just skip
 			}

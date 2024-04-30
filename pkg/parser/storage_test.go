@@ -3,8 +3,6 @@ package parser
 import (
 	"math/big"
 	"testing"
-
-	"github.com/0xVasconcelos/ethparser/pkg/ethereum"
 )
 
 func TestStorage_AddSubscription(t *testing.T) {
@@ -63,7 +61,7 @@ func TestStorage_IsSubscribed(t *testing.T) {
 
 func TestStorage_AddTransaction(t *testing.T) {
 	storage := NewMemoryStorage()
-	err := storage.AddTransaction("test", ethereum.Transaction{})
+	err := storage.AddTransaction("test", Transaction{})
 	if err != nil {
 		t.Errorf("Error adding transaction: %v", err)
 	}

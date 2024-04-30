@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"log"
-	"math/big"
 	"os"
 	"os/signal"
 	"syscall"
@@ -15,9 +14,9 @@ import (
 
 // declaring Parser and ParserClient here to simulate some client implementing the Parser interface
 type Parser interface {
-	GetCurrentBlock(context.Context) (*big.Int, error)
+	GetCurrentBlock(context.Context) (uint64, error)
 	Subscribe(context.Context, string) bool
-	GetTransactions(context.Context, string) ([]ethereum.Transaction, error)
+	GetTransactions(context.Context, string) ([]parser.Transaction, error)
 }
 
 type ParserClient struct {
@@ -39,7 +38,7 @@ func main() {
 
 	eth := ethereum.NewClient(params)
 	storage := parser.NewMemoryStorage()
-	parser := parser.NewNotifier(eth, storage, log.Default())
+	parser := parser.NewParser(eth, storage, log.Default())
 	go parser.Start(ctx, time.NewTicker(5*time.Second))
 
 	// any client that implements Parser interface
@@ -63,7 +62,7 @@ func main() {
 			if err != nil {
 				log.Printf("error getting transactions: %v", err)
 			}
-			log.Printf("Got %d transactions", len(txs))
+			log.Printf("Got %d transactions\n", len(txs))
 
 		case <-sig:
 			cancel()
