@@ -13,12 +13,14 @@ func (p *Parser) index(ctx context.Context) {
 	storageLastBlock, err := p.s.GetLastBlock()
 	if err != nil {
 		p.log.Println("Error getting last block:", err)
+		return
 	}
 
 	p.log.Println("Storage last block:", storageLastBlock)
 	networkLastBlock, err := p.e.GetCurrentBlock(ctx)
 	if err != nil {
 		p.log.Println("Error getting current block:", err)
+		return
 	}
 
 	p.log.Println("Network last block:", networkLastBlock)

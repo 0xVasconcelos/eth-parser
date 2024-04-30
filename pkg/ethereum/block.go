@@ -42,6 +42,7 @@ func (c *Client) GetCurrentBlock(ctx context.Context) (*big.Int, error) {
 	}
 
 	var b GetCurrentBlockResponse
+
 	err := c.post(ctx, req, &b)
 	if err != nil {
 		return nil, err

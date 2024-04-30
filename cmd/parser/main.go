@@ -39,7 +39,7 @@ func main() {
 	eth := ethereum.NewClient(params)
 	storage := parser.NewMemoryStorage()
 	parser := parser.NewParser(eth, storage, log.Default())
-	go parser.Start(ctx, time.NewTicker(5*time.Second))
+	go parser.Start(ctx, time.NewTicker(5*time.Millisecond))
 
 	// any client that implements Parser interface
 	client := ParserClient{parser}
